@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkChange | Быстрый обмен криптовалюты в Telegram</title>
+    <meta name="description" content="Надежный обменник криптовалюты в Telegram. Обмен USDT (TON, TRC-20, ERC-20), BTC, ETH на рубли, BYN и другие фиаты. Комиссия всего 1%, фиксация курса на 5 минут.">
+    <meta name="keywords" content="обменник криптовалюты, купить USDT TON, обмен USDT на рубли, обмен USDT на BYN, телеграм бот обменник, DarkChange, обмен крипты">
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Иконка сайта (Favicon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
+
+    <style>
+        :root {
+            --bg-main: #0b0e14;
+            --bg-card: #151a23;
+            --bg-card-hover: #1c2431;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --tg-color: #2AABEE;
+            --tg-glow: rgba(42, 171, 238, 0.4);
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Навигация --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: rgba(11, 14, 20, 0.85);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo { font-size: 24px; font-weight: 800; color: var(--text-main); text-decoration: none; letter-spacing: 1px;}
+        .logo span { color: var(--accent); }
+
+        .lang-switch {
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .lang-switch button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .lang-switch button.active { color: var(--accent); }
+        .lang-switch button:hover { color: white; }
+
+        /* --- Главный экран (Hero) --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 100px 20px 50px;
+            background: radial-gradient(circle at 50% 20%, #172339 0%, var(--bg-main) 60%);
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.15;
+            max-width: 900px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .btn-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--tg-color);
+            color: white;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--tg-glow);
+            animation: pulse 2s infinite;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 30px var(--tg-glow);
+        }
+
+        .btn-main svg { width: 26px; height: 26px; fill: currentColor; }
+
+        /* --- Преимущества --- */
+        .features {
+            padding: 100px 5%;
+            background-color: var(--bg-main);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 60px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background-color: var(--bg-card-hover);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .card-icon { font-size: 48px; margin-bottom: 20px; }
+        .card h3 { font-size: 22px; margin-bottom: 15px; color: var(--text-main); }
+        .card p { color: var(--text-muted); font-size: 16px; }
+
+        /* --- Валюты --- */
+        .currencies {
+            padding: 80px 5%;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-main) 0%, #0d121a 100%);
+        }
+
+        .currency-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .currency-badge {
+            background: rgba(255,255,255,0.03);
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s;
+        }
+        
+        .currency-badge:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* --- Подвал --- */
+        footer {
+            padding: 40px 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        footer a { color: var(--accent); text-decoration: none; font-weight: 600;}
+        footer a:hover { text-decoration: underline; }
+
+        /* Анимации */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 var(--tg-glow); }
+            70% { box-shadow: 0 0 0 15px rgba(42, 171, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(42, 171, 238, 0); }
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 34px; }
+            .hero p { font-size: 16px; }
+            .section-title { font-size: 28px; }
+            .btn-main { padding: 16px 30px; font-size: 16px; }
+            .card { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="logo">Dark<span>Change</span></a>
+        <div class="lang-switch">
+            <button id="btn-ru" class="active" onclick="setLang('ru')">RU</button>
+            <span style="color:#444">|</span>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1 id="t-hero-title">Обмен криптовалюты<br>прямо в <span>Telegram</span></h1>
+        <p id="t-hero-desc">Быстрый и безопасный обмен USDT, BTC, ETH и других монет на фиатные деньги. Комиссия всего 1%. Курс фиксируется на 5 минут.</p>
+        
+        <!-- ВАША ССЫЛКА НА БОТА -->
+        <a href="https://t.me/Obmenniki21vekBot" class="btn-main" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.686c.223-.198-.054-.31-.346-.11l-6.4 4.026-2.76-.865c-.6-.188-.614-.6.125-.89l10.78-4.157c.5-.18.94.11.78.89z"/></svg>
+            <span id="t-btn-start">Начать обмен</span>
+        </a>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title" id="t-why-title">Почему выбирают нас?</h2>
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <h3 id="t-f1-title">Мгновенные выплаты</h3>
+                <p id="t-f1-desc">Обработка заявки занимает от 5 до 15 минут. Фиат приходит сразу после подтверждения сети.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">💸</div>
+                <h3 id="t-f2-title">Комиссия всего 1%</h3>
+                <p id="t-f2-desc">Честные и прозрачные условия. Комиссия уже включена в итоговую сумму к получению.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">⏱</div>
+                <h3 id="t-f3-title">Фиксация курса</h3>
+                <p id="t-f3-desc">Курс фиксируется ровно на 5 минут. Вы можете спокойно оплатить, не переживая, что сумма изменится.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔒</div>
+                <h3 id="t-f4-title">Приватность</h3>
+                <p id="t-f4-desc">Мы не запрашиваем лишние данные и пароли. Ваша безопасность и анонимность — наш приоритет.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="currencies">
+        <h2 class="section-title" id="t-cur-title">Поддерживаемые валюты</h2>
+        <div class="currency-list">
+            <div class="currency-badge">💎 USDT (TON)</div>
+            <div class="currency-badge">💵 USDT (TRC-20)</div>
+            <div class="currency-badge">💵 USDT (ERC-20)</div>
+            <div class="currency-badge">🟠 Bitcoin (BTC)</div>
+            <div class="currency-badge">🔷 Ethereum (ETH)</div>
+            <div class="currency-badge">⚡ Tron (TRX)</div>
+            <div class="currency-badge">⚪ Litecoin (LTC)</div>
+            <div class="currency-badge">🇷🇺 RUB</div>
+            <div class="currency-badge">🇧🇾 BYN</div>
+            <div class="currency-badge">🇺🇸 USD</div>
+            <div class="currency-badge">🇪🇺 EUR</div>
+        </div>
+        <br><br>
+        <a href="https://t.me/Obmenniki21vekBot" class="btn-main" style="background: var(--accent); box-shadow: 0 4px 20px var(--accent-glow);" target="_blank">
+            <span id="t-btn-exchange">Перейти к обмену</span>
+        </a>
+    </section>
+
+    <footer>
+        <p>© 2024 DarkChange. <span id="t-footer-rights">Все права защищены.</span></p>
+        <p style="margin-top: 10px;"><span id="t-footer-contact">По всем вопросам:</span> <a href="https://t.me/Obmenniki21vekBot" target="_blank">@Obmenniki21vekBot</a></p>
+    </footer>
+
+    <!-- Скрипт перевода (без перезагрузки страницы) -->
+    <script>
+        const translations = {
+            ru: {
+                "t-hero-title": 'Обмен криптовалюты<br>прямо в <span>Telegram</span>',
+                "t-hero-desc": "Быстрый и безопасный обмен USDT, BTC, ETH и других монет на фиатные деньги. Комиссия всего 1%. Курс фиксируется на 5 минут.",
+                "t-btn-start": "Начать обмен",
+                "t-why-title": "Почему выбирают нас?",
+                "t-f1-title": "Мгновенные выплаты",
+                "t-f1-desc": "Обработка заявки занимает от 5 до 15 минут. Фиат приходит сразу после подтверждения сети.",
+                "t-f2-title": "Комиссия всего 1%",
+                "t-f2-desc": "Честные и прозрачные условия. Комиссия уже включена в итоговую сумму к получению.",
+                "t-f3-title": "Фиксация курса",
+                "t-f3-desc": "Курс фиксируется ровно на 5 минут. Вы можете спокойно оплатить, не переживая, что сумма изменится.",
+                "t-f4-title": "Приватность",
+                "t-f4-desc": "Мы не запрашиваем лишние данные и пароли. Ваша безопасность и анонимность — наш приоритет.",
+                "t-cur-title": "Поддерживаемые валюты",
+                "t-btn-exchange": "Перейти к обмену",
+                "t-footer-rights": "Все права защищены.",
+                "t-footer-contact": "По всем вопросам:"
+            },
+            en: {
+                "t-hero-title": 'Crypto Exchange<br>right in <span>Telegram</span>',
+                "t-hero-desc": "Fast and secure exchange of USDT, BTC, ETH and other coins for fiat money. Only 1% fee. Rate is locked for 5 minutes.",
+                "t-btn-start": "Start Exchange",
+                "t-why-title": "Why choose us?",
+                "t-f1-title": "Instant Payouts",
+                "t-f1-desc": "Order processing takes 5 to 15 minutes. Fiat is sent immediately after network confirmation.",
+                "t-f2-title": "Only 1% Fee",
+                "t-f2-desc": "Fair and transparent conditions. The fee is already included in the final amount.",
+                "t-f3-title": "Rate Lock",
+                "t-f3-desc": "The rate is locked for exactly 5 minutes. You can pay calmly without worrying about the amount changing.",
+                "t-f4-title": "Privacy",
+                "t-f4-desc": "We do not ask for unnecessary data or passwords. Your security and anonymity are our priority.",
+                "t-cur-title": "Supported Currencies",
+                "t-btn-exchange": "Start Exchanging",
+                "t-footer-rights": "All rights reserved.",
+                "t-footer-contact": "Contact us:"
+            }
+        };
+
+        function setLang(lang) {
+            // Обновляем кнопки
+            document.getElementById('btn-ru').classList.remove('active');
+            document.getElementById('btn-en').classList.remove('active');
+            document.getElementById('btn-' + lang).classList.add('active');
+
+            // Меняем тексты
+            for (const id in translations[lang]) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === 't-hero-title') {
+                        el.innerHTML = translations[lang][id];
+                    } else {
+                        el.innerText = translations[lang][id];
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
